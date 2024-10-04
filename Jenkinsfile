@@ -1,8 +1,18 @@
 pipeline {
     agent any
-
     }
+
     stages {
+        stage('Install Trivy') {
+    steps {
+        script {
+            sh '''
+            wget https://github.com/aquasecurity/trivy/releases/download/v0.33.0/trivy_0.33.0_Linux-64bit.deb
+            sudo dpkg -i trivy_0.33.0_Linux-64bit.deb
+            '''
+        }
+    }
+}
         stage('Git Cloning') {
             steps {
                 echo 'Cloning git repo'
