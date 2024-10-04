@@ -30,7 +30,12 @@ pipeline {
         stage('Security Scan with Trivy') {
             steps {
                 script {
-                    sh 'trivy image ${USER}/flask-monitoring:latest'
+                    // Docker Hub'a push edilen imajı Trivy ile tarıyoruz
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                        sh '''
+                        trivy image --exit-code 1 --severity HIGH ${USER}/flask-monitoring:latest
+                        '''
+                    }
                 }
             }
         }
