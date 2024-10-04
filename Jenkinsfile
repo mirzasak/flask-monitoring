@@ -1,7 +1,6 @@
 pipeline {
     agent any
-    }
-
+    
     stages {
         stage('Install Trivy') {
             steps {
@@ -68,3 +67,4 @@ pipeline {
             }
         }
     }
+}
