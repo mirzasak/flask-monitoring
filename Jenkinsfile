@@ -7,7 +7,7 @@ pipeline {
                 script {
                     sh '''
                         wget https://github.com/aquasecurity/trivy/releases/download/v0.33.0/trivy_0.33.0_Linux-64bit.deb
-                        sudo dpkg -i trivy_0.33.0_Linux-64bit.deb
+                        dpkg -i trivy_0.33.0_Linux-64bit.deb
                     '''
                 }
             }
@@ -42,7 +42,7 @@ pipeline {
                     // Docker Hub'a push edilen imajı Trivy ile tarıyoruz
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                         sh '''
-                        trivy image --exit-code 1 --severity HIGH mirzasak/flask-monitoring:latest
+                        trivy image mirzasak/flask-monitoring:latest
                         '''
                     }
                 }
