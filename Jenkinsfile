@@ -1,6 +1,7 @@
 pipeline {
     agent any
 
+    }
     stages {
         stage('Git Cloning') {
             steps {
@@ -23,6 +24,13 @@ pipeline {
                     docker tag flask-monitoring ${USER}/flask-monitoring:latest
                     docker push ${USER}/flask-monitoring:latest
                     '''
+                }
+            }
+        }
+        stage('Security Scan with Trivy') {
+            steps {
+                script {
+                    sh 'trivy image ${USER}/flask-monitoring:latest'
                 }
             }
         }
