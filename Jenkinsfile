@@ -28,7 +28,7 @@ pipeline {
         }
         stage('Integrate Remote kubernetess with Jenkins') {
             steps {
-                withCredentials([string(credentialsId: 'SECRET_TOKEN', variable: 'KUBE_TOKEN')]) {
+                withCredentials([string(credentialsId: 'secret_token', variable: 'KUBE_TOKEN')]) {
                     sh '''
                     curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"
                     chmod u+x ./kubectl
