@@ -28,7 +28,7 @@ pipeline {
         }
         stage('Trivy Scan') {
             steps {
-                sh 'trivy mirzasak/flask-monitoring-app:latest'
+                sh 'trivy image mirzasak/flask-monitoring-app:latest'
             }
         }
         stage('Integrate Remote kubernetess with Jenkins') {
