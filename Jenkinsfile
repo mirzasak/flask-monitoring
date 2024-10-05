@@ -2,16 +2,6 @@ pipeline {
     agent any
     
     stages {
-        stage('Install Trivy') {
-            steps {
-                script {
-                    sh '''
-                        wget https://github.com/aquasecurity/trivy/releases/download/v0.33.0/trivy_0.33.0_Linux-64bit.deb
-                        dpkg -i trivy_0.33.0_Linux-64bit.deb
-                    '''
-                }
-            }
-        }
         stage('Git Cloning') {
             steps {
                 echo 'Cloning git repo'
@@ -21,7 +11,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo 'Building the image'
-                sh 'docker build -t flask-monitoring .'
+                sh 'docker build -t flask-monitoring-app .'
             }
         }
         stage('Push to Docker Hub') {
@@ -30,22 +20,15 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh '''
                     echo "${PASS}" | docker login --username "${USER}" --password-stdin
-                    docker tag flask-monitoring ${USER}/flask-monitoring:latest
-                    docker push ${USER}/flask-monitoring:latest
+                    docker tag flask-monitoring-app ${USER}/flask-monitoring-app:latest
+                    docker push ${USER}/flask-monitoring-app:latest
                     '''
                 }
             }
         }
-        stage('Security Scan with Trivy') {
+        stage('Trivy Scan') {
             steps {
-                script {
-                    // Docker Hub'a push edilen imajı Trivy ile tarıyoruz
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                        sh '''
-                        trivy image mirzasak/flask-monitoring:latest
-                        '''
-                    }
-                }
+                sh 'trivy mirzasak/flask-monitoring-app:latest'
             }
         }
         stage('Integrate Remote kubernetess with Jenkins') {
@@ -55,9 +38,9 @@ pipeline {
                     curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"
                     chmod u+x ./kubectl
                     export KUBECONFIG=$(mktemp)
-                    ./kubectl config set-cluster t3st-k8s-cluster --server=https://15d0d57a-8711-495c-979d-605441fb1e9b.k8s.ondigitalocean.com --insecure-skip-tls-verify=true
+                    ./kubectl config set-cluster do-nyc1-k8s-test-jenkins --server=https://9c2d9d56-5ace-443a-ba32-670ce25a5ba3.k8s.ondigitalocean.com --insecure-skip-tls-verify=true
                     ./kubectl config set-credentials jenkins --token=${KUBE_TOKEN}
-                    ./kubectl config set-context default --cluster=t3st-k8s-cluster --user=jenkins --namespace=default
+                    ./kubectl config set-context default --cluster=do-nyc1-k8s-test-jenkins --user=jenkins --namespace=default
                     ./kubectl config use-context default
                     ./kubectl get nodes
                     ./kubectl apply -f service.yaml
